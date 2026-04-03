@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 	free(numbers);
 
 	// vector mathematics
-	vec2d A = {100, 100};
+	vec2d A = {50, 50};
 	vec2d B = {300, 50};
 	vec2d C = {150, 300};
 
@@ -123,7 +123,8 @@ int main(int argc, char* argv[])
 				break;
 			}
 		}
-
+		
+		/*
 		// drawing to the texture	
 		for (int y = y1; y < y2; y++)			// screen_height
 		{
@@ -146,17 +147,15 @@ int main(int argc, char* argv[])
 				{
 					pixels[y * SCREEN_WIDTH + x] = green;
 				}
-				else
-				{
-					pixels[y * SCREEN_WIDTH + x] = red;
-				}
 			}
 		}
-
+		*/
 
 		pixels[A.y * SCREEN_WIDTH + A.x] = green;
 		pixels[B.y * SCREEN_WIDTH + B.x] = green;	
 		pixels[C.y * SCREEN_WIDTH + C.x] = green;
+
+		draw_triangle(pixels, A, B, C, blue);
 
 		SDL_UpdateTexture(engine.texture, NULL, pixels, SCREEN_WIDTH * sizeof(u32));
 		SDL_RenderClear(engine.renderer);
