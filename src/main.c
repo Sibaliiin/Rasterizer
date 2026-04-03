@@ -13,14 +13,15 @@
 #include	"engine.h"
 #include	"types.h"
 #include	"maths.h"
+#include	"rasterizer.h"
 
 int main(int argc, char* argv[])
 {
 	Engine engine = {NULL, NULL};
 	Camera cam = {0.0, 0.0, 1.0};
 
+	// pixels
 	u32 *pixels = malloc(SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(u32));
-
 	SDL_PixelFormat *format = SDL_AllocFormat(SDL_PIXELFORMAT_ARGB8888);
 
 	// defining colors
@@ -47,18 +48,19 @@ int main(int argc, char* argv[])
 	free(numbers);
 
 	// vector mathematics
-	vec2d A = {50, 50};
-	vec2d B = {250, 50};
-	vec2d C = {50, 250};
+	vec2d A = {100, 100};
+	vec2d B = {300, 50};
+	vec2d C = {150, 300};
 
+	i32 x1 = bbox_x1(A, B, C);
+	i32 y1 = bbox_y1(A, B, C);
+	i32 x2 = bbox_x2(A, B, C);
+	i32 y2 = bbox_y2(A, B, C);
+		
 	printf("bounding box x1: %d\n", bbox_x1(A, B, C));
 	printf("bounding box y1: %d\n", bbox_y1(A, B, C));
-
 	printf("bounding box x2: %d\n", bbox_x2(A, B, C));
 	printf("bounding box y2: %d\n", bbox_y2(A, B, C));
-
-
-
 
 	vec2d u = {0, 0};
 	vec2d ur = {0, 0};
@@ -104,45 +106,28 @@ int main(int argc, char* argv[])
 		{
 			switch (event.type)
 			{
-			case SDL_QUIT:
-				game_cleanup(&engine, EXIT_SUCCESS);
-				break;
+				case SDL_QUIT:
+					game_cleanup(&engine, EXIT_SUCCESS);
+					break;
 
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.scancode)
 				{
-				case SDL_SCANCODE_ESCAPE:
-					game_cleanup(&engine, EXIT_SUCCESS);
-					break;
-				default:
-					break;
+					case SDL_SCANCODE_ESCAPE:
+						game_cleanup(&engine, EXIT_SUCCESS);
+						break;
+					default:
+						break;
 				}
 			default:
 				break;
 			}
 		}
 
-		
-/*
-		// Draw a checkerboard pattern onto the screen
-		for (int y = 0; y < SCREEN_HEIGHT; y++) {
-			for (int x = 0; x < SCREEN_WIDTH; x++) {
-				pixels[y * SCREEN_WIDTH + x] = ((x ^ y) & 32) ? magenta : black;
-            		}
-        	}
-*/
-/*
-		for (int y=0; y<SCREEN_HEIGHT; y++)
+		// drawing to the texture	
+		for (int y = y1; y < y2; y++)			// screen_height
 		{
-			for (int x=0; x<SCREEN_WIDTH; x++)
-			{
-				pixels[y*SCREEN_WIDTH+x] = (((B.x-A.x) * (x-A.x) + (B.y-A.y) * (y-A.y))<0) ? black : magenta;
-			}
-		}
-*/
-		for (int y=0; y<SCREEN_HEIGHT; y++)
-		{
-			for (int x=0; x<SCREEN_WIDTH; x++)
+			for (int x=x1; x<x2; x++)		// screen_width
 			{	
 				P.x = x;
 				P.y = y;
@@ -156,20 +141,14 @@ int main(int argc, char* argv[])
 				PC.x = P.x-C.x;
 				PC.y = P.y-C.y;
 				
-				if 	(	
-					dot_product(PA, ur) > -0.1 && dot_product(PA, ur) < 0.1 ||
-					dot_product(PB, vr) > -0.1 && dot_product(PB, vr) < 0.1 ||
-					dot_product(PC, wr) > -0.1 && dot_product(PC, wr) < 0.1
-					)
-					
-				
-				//if ((dot_product(PA, ur) > 0) && (dot_product(PB, vr) > 0) && dot_product(PC, wr) > 0)		
+			
+				if ((dot_product(PA, ur) > 0) && (dot_product(PB, vr) > 0) && dot_product(PC, wr) > 0)		
 				{
 					pixels[y * SCREEN_WIDTH + x] = green;
 				}
 				else
 				{
-					pixels[y * SCREEN_WIDTH + x] = black;
+					pixels[y * SCREEN_WIDTH + x] = red;
 				}
 			}
 		}

@@ -5,10 +5,8 @@
 
 #include	"engine.h"
 
-
-
 // function definitions	
-void game_cleanup	(Engine *engine, int exit_status)
+void game_cleanup(Engine *engine, int exit_status)
 {
 	SDL_DestroyRenderer(engine->renderer);
 	SDL_DestroyWindow(engine->window);
@@ -16,7 +14,7 @@ void game_cleanup	(Engine *engine, int exit_status)
 	exit(exit_status);
 }
 
-bool sdl_initialize	(Engine *engine) 
+bool sdl_initialize(Engine *engine) 
 {
 	if (SDL_Init(SDL_INIT_EVERYTHING))
 	{
