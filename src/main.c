@@ -31,6 +31,8 @@ int main(int argc, char* argv[])
 	u32	green	= SDL_MapRGBA(format, 0,	255,	0,	255);
 	u32	blue	= SDL_MapRGBA(format, 0,	0,	255,	255);
 	u32	magenta	= SDL_MapRGBA(format, 255,	0,	255,	255);
+	u32	yellow	= SDL_MapRGBA(format, 255,	255,	0,	255);
+	u32	cyan	= SDL_MapRGBA(format, 0,	255,	255,	255);
 
 	// custom color
 	i8 cr = 0;
@@ -39,59 +41,15 @@ int main(int argc, char* argv[])
 	i8 ca = 255;
 	u32	color	= SDL_MapRGBA(format, cr,	cg,	cb,	ca);
 
-	// TEST MALLOC
-	size_t n = 4;
-	i8 *numbers = malloc(n);
-	numbers[0] = 7;
-	printf("numbers memory allocation.\n");
-	printf("numbers[0] = %d\n", numbers[0]);
-	free(numbers);
-
 	// vector mathematics
-	vec2d A = {50, 50};
-	vec2d B = {300, 50};
-	vec2d C = {150, 300};
-
-	i32 x1 = bbox_x1(A, B, C);
-	i32 y1 = bbox_y1(A, B, C);
-	i32 x2 = bbox_x2(A, B, C);
-	i32 y2 = bbox_y2(A, B, C);
-		
-	printf("bounding box x1: %d\n", bbox_x1(A, B, C));
-	printf("bounding box y1: %d\n", bbox_y1(A, B, C));
-	printf("bounding box x2: %d\n", bbox_x2(A, B, C));
-	printf("bounding box y2: %d\n", bbox_y2(A, B, C));
-
-	vec2d u = {0, 0};
-	vec2d ur = {0, 0};
+	vec2d A = {100, 100};
+	vec2d B = {400, 100};
+	vec2d C = {100, 400};
+	vec2d D = {400, 400};
+	vec2d E = {150, 50};
+	vec2d F = {450, 50};
+	vec2d G = {450, 350};
 	
-	vec2d v = {0, 0};
-	vec2d vr = {0, 0};
-	
-	vec2d w = {0, 0};
-	vec2d wr = {0, 0};
-
-	u.x = B.x - A.x;
-	u.y = B.y - A.y;
-	ur.x = -u.y;
-	ur.y = u.x;
-	
-	v.x = C.x - B.x;
-	v.y = C.y - B.y;
-	vr.x = -v.y;
-	vr.y = v.x;
-
-	w.x = A.x - C.x;
-	w.y = A.y - C.y;
-	wr.x = -w.y;
-	wr.y = w.x;
-
-	vec2d P = {0, 0};
-
-	vec2d PA = {0, 0};
-	vec2d PB = {0, 0};
-	vec2d PC = {0, 0};
-
 	// initialize engine
 	if (sdl_initialize(&engine))
 	{
@@ -124,38 +82,13 @@ int main(int argc, char* argv[])
 			}
 		}
 		
-		/*
-		// drawing to the texture	
-		for (int y = y1; y < y2; y++)			// screen_height
-		{
-			for (int x=x1; x<x2; x++)		// screen_width
-			{	
-				P.x = x;
-				P.y = y;
-			
-				PA.x = P.x-A.x;
-				PA.y = P.y-A.y;
-	
-				PB.x = P.x-B.x;
-				PB.y = P.y-B.y;
-			
-				PC.x = P.x-C.x;
-				PC.y = P.y-C.y;
-				
-			
-				if ((dot_product(PA, ur) > 0) && (dot_product(PB, vr) > 0) && dot_product(PC, wr) > 0)		
-				{
-					pixels[y * SCREEN_WIDTH + x] = green;
-				}
-			}
-		}
-		*/
-
-		pixels[A.y * SCREEN_WIDTH + A.x] = green;
-		pixels[B.y * SCREEN_WIDTH + B.x] = green;	
-		pixels[C.y * SCREEN_WIDTH + C.x] = green;
-
+		// draw an EPIC cube
 		draw_triangle(pixels, A, B, C, blue);
+		draw_triangle(pixels, B, D, C, green);
+		draw_triangle(pixels, A, E, B, red);
+		draw_triangle(pixels, E, F, B, yellow);
+		draw_triangle(pixels, B, F, D, cyan);
+		draw_triangle(pixels, F, G, D, magenta);
 
 		SDL_UpdateTexture(engine.texture, NULL, pixels, SCREEN_WIDTH * sizeof(u32));
 		SDL_RenderClear(engine.renderer);
