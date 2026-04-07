@@ -5,6 +5,7 @@
 #include	<stdio.h>
 #include	<stdint.h>
 #include	<stdbool.h>
+#include	<math.h>
 
 // SDL2
 #include	<SDL2/SDL.h>
@@ -15,10 +16,11 @@
 #include	"maths.h"
 #include	"rasterizer.h"
 
+vec
+
 int main(int argc, char* argv[])
 {
 	Engine engine = {NULL, NULL};
-	Camera cam = {0.0, 0.0, 1.0};
 
 	// pixels
 	u32 *pixels = malloc(SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(u32));
@@ -34,14 +36,23 @@ int main(int argc, char* argv[])
 	u32	yellow	= SDL_MapRGBA(format, 255,	255,	0,	255);
 	u32	cyan	= SDL_MapRGBA(format, 0,	255,	255,	255);
 
-	// custom color
-	i8 cr = 0;
-	i8 cg = 0;
-	i8 cb = 0;
-	i8 ca = 255;
-	u32	color	= SDL_MapRGBA(format, cr,	cg,	cb,	ca);
+	// Projection Variables
+	float fNear = 0.1f;
+	float fFar = 1000.0f;
+	float fFov = 90.0f;
+	float fAspectRatio = (float)SCREEN_HEIGHT / (float)SCREEN_WIDTH;
+	float fFovRad = 1.0f / tanf(fFov * 0.5f / 180.0f * 3.14159f);
+	
+	// Projection Matrix
+	float *proj_matrix = malloc(6*sizeof(float));
+	proj_matrix[0] = fAspectRatio * fFovRad;
+	proj_matrix[1] = fFovRad;
+	proj_matrix[2] = fFar / (fFar - fNear);
+	proj_matrix[3] =  (-fFar * fNear) / (fFar - fNear);
+	proj_matrix[4] = 1.0f;
+	proj_matrix[5] = 0.0f;
 
-	// vector mathematics
+	// test cube (manual)
 	vec2d A = {100, 100};
 	vec2d B = {400, 100};
 	vec2d C = {100, 400};
@@ -50,6 +61,16 @@ int main(int argc, char* argv[])
 	vec2d F = {450, 50};
 	vec2d G = {450, 350};
 	
+	// test cube (projected)
+	vec3f A0 = {1.0000, 1.0000, 1.0000};
+	vec3f A1 = {1.0000, 1.0000, -1.0000};
+	vec3f A2 = {1.0000, -1.0000, 1.0000};
+	vec3f A3 = {1.0000, -1.0000, -1.0000};
+	vec3f A4 = {-1.0000, 1.0000, 1.0000};
+	vec3f A5 = {-1.0000, 1.0000, -1.0000};
+	vec3f A6 = {-1.0000, -1.0000, 1.0000};
+	vec3f A7 = {-1.0000, -1.0000, -1.0000};
+
 	// initialize engine
 	if (sdl_initialize(&engine))
 	{
@@ -82,7 +103,7 @@ int main(int argc, char* argv[])
 			}
 		}
 		
-		// draw an EPIC cube
+		// draw a cube (flat)
 		draw_triangle(pixels, A, B, C, blue);
 		draw_triangle(pixels, B, D, C, green);
 		draw_triangle(pixels, A, E, B, red);
@@ -90,6 +111,9 @@ int main(int argc, char* argv[])
 		draw_triangle(pixels, B, F, D, cyan);
 		draw_triangle(pixels, F, G, D, magenta);
 
+		// draw a cube (projected)
+
+		// render
 		SDL_UpdateTexture(engine.texture, NULL, pixels, SCREEN_WIDTH * sizeof(u32));
 		SDL_RenderClear(engine.renderer);
 		SDL_RenderCopy(engine.renderer, engine.texture, NULL, NULL);
@@ -98,9 +122,10 @@ int main(int argc, char* argv[])
 		SDL_Delay(16);
 	}
 
+	// clean up everything
 	free(pixels);
+	free(proj_matrix);
 	SDL_FreeFormat(format);
-	
 	game_cleanup(&engine, EXIT_SUCCESS);	
 
 	return 0;

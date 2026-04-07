@@ -17,14 +17,6 @@
 #define	i64	int64_t
 
 // structures
-//
-// camera structure
-typedef struct
-{
-	double x;
-	double y;
-	double scale;
-} Camera;
 
 // mathematical 3d point OR vector
 // depending on use case
