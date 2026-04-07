@@ -14,9 +14,9 @@
 #include	"engine.h"
 #include	"types.h"
 #include	"maths.h"
-#include	"rasterizer.h"
+#include	"graphics.h"
 
-vec
+//vec
 
 int main(int argc, char* argv[])
 {

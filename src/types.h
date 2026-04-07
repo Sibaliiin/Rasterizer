@@ -3,23 +3,19 @@
 
 #include <stdint.h>
 
-// definitions
-//
-// integers
+// unsigned integers
 #define u8	uint8_t
 #define u16	uint16_t
 #define	u32	uint32_t
 #define	u64	uint64_t
 
+// signed integers
 #define i8	int8_t
 #define	i16	int16_t
 #define i32	int32_t
 #define	i64	int64_t
 
-// structures
-
-// mathematical 3d point OR vector
-// depending on use case
+// vector			3 dimensional, floating point coordinates
 typedef struct
 {
 	float x;
@@ -27,16 +23,14 @@ typedef struct
 	float z;
 } vec3f;
 
-// mathematical 2d point or vector
-// u16 = 0 to 65535
+// vector			2 dimensional, unsigned integers 
 typedef struct
 {
 	u32 x;
 	u32 y;
 } vec2d;
 
-// triangle structure
-// uses vec3f, here they are _points_ in 3d space
+// triangle structure		three points, floating point numbers
 typedef struct
 {
 	vec3f A;

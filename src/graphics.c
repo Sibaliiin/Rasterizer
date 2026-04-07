@@ -9,27 +9,9 @@ u32 draw_triangle (u32 *pixels, vec2d A, vec2d B, vec2d C, u32 color)
 	i32 x2 = bbox_x2(A, B, C);
 	i32 y2 = bbox_y2(A, B, C);
 
-	vec2d u = {0, 0};
-	vec2d ur = {0, 0};	
-	vec2d v = {0, 0};
-	vec2d vr = {0, 0};
-	vec2d w = {0, 0};
-	vec2d wr = {0, 0};
-
-	u.x = B.x - A.x;
-	u.y = B.y - A.y;
-	ur.x = -u.y;
-	ur.y = u.x;
-	
-	v.x = C.x - B.x;
-	v.y = C.y - B.y;
-	vr.x = -v.y;
-	vr.y = v.x;
-
-	w.x = A.x - C.x;
-	w.y = A.y - C.y;
-	wr.x = -w.y;
-	wr.y = w.x;
+	vec2d ur = {A.y-B.y, B.x-A.x};
+	vec2d vr = {B.y-C.y, C.x-B.x};
+	vec2d wr = {C.y-A.y, A.x-C.x};
 
 	vec2d P = {0, 0};
 
@@ -52,7 +34,7 @@ u32 draw_triangle (u32 *pixels, vec2d A, vec2d B, vec2d C, u32 color)
 			PC.x = P.x-C.x;
 			PC.y = P.y-C.y;
 			
-			if ((dot_product(PA, ur) > 0) && (dot_product(PB, vr) > 0) && dot_product(PC, wr) > 0)		
+			if ((dot_product(PA, ur) > -1) && (dot_product(PB, vr) > -1) && dot_product(PC, wr) > -1)		
 			{
 				pixels[y * SCREEN_WIDTH + x] = color;
 			}		

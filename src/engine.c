@@ -5,7 +5,6 @@
 
 #include	"engine.h"
 
-// function definitions	
 void game_cleanup(Engine *engine, int exit_status)
 {
 	SDL_DestroyRenderer(engine->renderer);
