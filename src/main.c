@@ -18,16 +18,7 @@
 
 #define NEAR_PLANE 0.1f
 
-/*
-// projection function
-vec2d	project_point	(vec3f P,	// point in 3d space
-			proj_matrix,	// projection matrix
-			vec2d p);	// pixel on the screen
-*/
-
 vec3f	scale_point	(vec3f P, float d);
-vec3f	move_point	(vec3f P, vec3f v);
-vec3f	invert_vector	(vec3f v);
 
 vec3f	screen		(vec3f P);
 vec3f	project		(vec3f P);
@@ -71,22 +62,16 @@ int main(int argc, char* argv[])
 	
 	// test cube (projected)
 	vec3f cube_v[8];
-	cube_v[0] = (vec3f){0.5, 0.5, 4.0};
-	cube_v[1] = (vec3f){-0.5, 0.5, 4.0};
-	cube_v[2] = (vec3f){0.5, -0.5, 4.0};
-	cube_v[3] = (vec3f){-0.5, -0.5, 4.0};
-	cube_v[4] = (vec3f){0.5, 0.5, 5.0};
-	cube_v[5] = (vec3f){-0.5, 0.5, 5.0};
-	cube_v[6] = (vec3f){0.5, -0.5, 5.0};
-	cube_v[7] = (vec3f){-0.5, -0.5, 5.0};
 	vec3f cube_center = {0.0, 0.0, 4.5};
 
 	float rad = 3.14159/180.0;
 	float height = 90*rad;
 	double angle = 10*rad;
 
-	// test point
-	vec2d P = {100, 100};
+
+
+	double angle_p = 0*rad;
+
 
 
 	// initialize engine
@@ -161,6 +146,16 @@ int main(int argc, char* argv[])
 		c_b = 0;
 		color_c = SDL_MapRGBA(format, c_r, c_g, c_b, c_a);
 
+		// defining cube vertices
+		cube_v[0] = (vec3f){0.5, 0.5, 4.0};
+		cube_v[1] = (vec3f){-0.5, 0.5, 4.0};
+		cube_v[2] = (vec3f){0.5, -0.5, 4.0};
+		cube_v[3] = (vec3f){-0.5, -0.5, 4.0};
+		cube_v[4] = (vec3f){0.5, 0.5, 5.0};
+		cube_v[5] = (vec3f){-0.5, 0.5, 5.0};
+		cube_v[6] = (vec3f){0.5, -0.5, 5.0};
+		cube_v[7] = (vec3f){-0.5, -0.5, 5.0};
+		
 		// projected cube
 		vec3f cube_v_rxz[8];
 		vec3f cube_v_p[8];
@@ -183,6 +178,113 @@ int main(int argc, char* argv[])
 			cube_v_pixel[i] = (vec2d){cube_v_s[i].x, cube_v_s[i].y};
 		}
 
+		// TESTING AND FINALISING THE ROTATION AND PROJECTION PIPELINE ON vec3f P1 AND P2
+		// ==============================================================================
+		//
+
+		vec3f P1 		= {0.5, 0.5, 4};
+		vec3f P2 		= {-0.5, 0.5, 5};
+		vec3f P_halo		= {0, 0.5, 4.5};
+		vec3f P_center 		= {0.0, 0.0, 4.5};
+		vec2d p1 		= {0, 0};
+		vec2d p2 		= {0, 0};
+		vec2d p_halo		= {0, 0};
+		
+
+		// right top point
+		//
+		// move the point to the origin
+		P1.x -= P_center.x;
+		P1.y -= P_center.y;
+		P1.z -= P_center.z;
+
+		// rotate the point
+		P1 = rotate_xz(P1, angle_p);
+
+		// move the point back
+		P1.x += P_center.x;
+		P1.y += P_center.y;
+		P1.z += P_center.z;
+
+		// check if near plane
+		if (P1.z > NEAR_PLANE)
+		{
+			P1 = project(P1);
+			P1 = screen(P1);
+			p1.x = P1.x;
+			p1.y = P1.y;
+
+			draw_rect(pixels, p1, 5, green);
+		}
+
+
+		// left top point
+		//
+		// move the point to the origin
+		P2.x -= P_center.x;
+		P2.y -= P_center.y;
+		P2.z -= P_center.z;
+
+		// rotate the point
+		P2 = rotate_xz(P2, angle_p);
+
+		// move the point back
+		P2.x += P_center.x;
+		P2.y += P_center.y;
+		P2.z += P_center.z;
+
+		// check if near plane
+		if (P2.z > NEAR_PLANE)
+		{
+			P2 = project(P2);
+			P2 = screen(P2);
+			p2.x = P2.x;
+			p2.y = P2.y;
+		
+			draw_rect(pixels, p2, 5, green);
+		}
+
+
+		// center "halo" point, shouldn't move
+		//
+		// move the point to the origin
+		P_halo.x -= P_center.x;
+		P_halo.y -= P_center.y;
+		P_halo.z -= P_center.z;
+
+		// rotate the point
+		P_halo = rotate_xz(P_halo, angle_p);
+
+		// move the point back
+		P_halo.x += P_center.x;
+		P_halo.y += P_center.y;
+		P_halo.z += P_center.z;
+
+	
+		// check if near plane
+		if (P_halo.z > NEAR_PLANE)
+		{
+			P_halo = project(P_halo);
+			P_halo = screen(P_halo);
+			p_halo.x = P_halo.x;
+			p_halo.y = P_halo.y;
+
+			draw_rect(pixels, p_halo, 5, yellow);
+		}
+		// draw a projected, rotated pixel p1 and p2
+			
+		angle_p += 2*rad;
+
+		if (angle_p >= 2*3.141592)
+		{
+			angle_p -= 2*3.141592;
+		}
+
+
+		// ROTATION TESTING GROUND:OVER
+		// ===============================================================================
+		//
+	
 		angle += 0.5*rad;
 
 		if (angle >= 2*3.141592)
@@ -190,8 +292,6 @@ int main(int argc, char* argv[])
 			angle -= 2*3.141592;
 		}
 
-
-		
 		// draw a projected test triangle
 		draw_triangle(pixels, cube_v_pixel[1], cube_v_pixel[0], cube_v_pixel[3], blue);
 		draw_triangle(pixels, cube_v_pixel[3], cube_v_pixel[0], cube_v_pixel[2], green);	
@@ -251,24 +351,4 @@ vec3f rotate_xz (vec3f P, double angle)
 	P.z = z;
 
 	return P;
-}
-
-vec3f move_point(vec3f P, vec3f v)
-{
-	P.x += v.x;
-	P.y += v.y;
-	P.z += v.z;
-
-	return P;
-}
-
-vec3f invert_vector(vec3f v)
-{
-	vec3f v_i = {0.0, 0.0, 0.0};
-
-	v_i.x = -v.x;
-	v_i.y = -v.y;
-	v_i.z = -v.z;
-
-	return v_i;
 }
