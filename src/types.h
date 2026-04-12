@@ -26,8 +26,8 @@ typedef struct
 // vector			2 dimensional, unsigned integers 
 typedef struct
 {
-	u32 x;
-	u32 y;
+	i32 x;
+	i32 y;
 } vec2d;
 
 // triangle structure		three points, floating point numbers

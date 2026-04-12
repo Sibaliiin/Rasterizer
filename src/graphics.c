@@ -66,7 +66,7 @@ void draw_triangle(u32 *pixels, vec2d A, vec2d B, vec2d C, u32 color)
 	// drawing to the texture	
 	for (int y = y1; y < y2; y++)			
 	{
-		for (int x=x1; x<x2; x++)	
+		for (int x = x1; x < x2; x++)	
 		{	
 			P.x = x;
 			P.y = y;
@@ -78,10 +78,16 @@ void draw_triangle(u32 *pixels, vec2d A, vec2d B, vec2d C, u32 color)
 			PC.x = P.x-C.x;
 			PC.y = P.y-C.y;
 			
-			if ((dot_product(PA, ur) >= 0) && (dot_product(PB, vr) >= 0) && dot_product(PC, wr) >= 0)		
+			if (dot_product(PA, ur) >= 0 && dot_product(PB, vr) >= 0 && dot_product(PC, wr) >= 0)		
 			{
 				pixels[y * SCREEN_WIDTH + x] = color;
-			}		
+			}
+			/*
+			else
+			{
+				pixels[y * SCREEN_WIDTH + x] = color;
+			}
+			*/
 		}
 	}
 }

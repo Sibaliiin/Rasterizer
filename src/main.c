@@ -18,15 +18,35 @@
 
 #define NEAR_PLANE 0.1f
 
-vec3f	scale_point	(vec3f P, float d);
-
-vec3f	screen		(vec3f P);
-vec3f	project		(vec3f P);
-vec3f	rotate_xz	(vec3f P, double angle);
+vec3f	sib_Screen		(vec3f P);
+vec3f	sib_Project		(vec3f P);
+vec3f	sib_RotateXZ	(vec3f P, double angle);
 
 int main(int argc, char* argv[])
 {
 	Engine engine = {NULL, NULL};
+
+	// defining cube vertices
+	vec3f v[9];
+	v[0] = (vec3f){0.5, 0.5, 2.0};		// first vertice
+	v[1] = (vec3f){-0.5, 0.5, 2.0};
+	v[2] = (vec3f){0.5, -0.5, 2.0};
+	v[3] = (vec3f){-0.5, -0.5, 2.0};
+	v[4] = (vec3f){0.5, 0.5, 3.0};
+	v[5] = (vec3f){-0.5, 0.5, 3.0};
+	v[6] = (vec3f){0.5, -0.5, 3.0};
+	v[7] = (vec3f){-0.5, -0.5, 3.0};	// last vertice	
+	v[8] = (vec3f){0.0, 0.0, 2.5};		// center of the cube
+	
+	// projected points, 
+	vec3f vT[8];
+	for (int i=0; i<8; i++)
+	{
+		vT[i] = v[i];
+	}
+
+	// pixel points of v
+	vec2d vP[8];
 
 	// pixels
 	u32 *pixels = malloc(SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(u32));
@@ -65,14 +85,8 @@ int main(int argc, char* argv[])
 	vec3f cube_center = {0.0, 0.0, 4.5};
 
 	float rad = 3.14159/180.0;
-	float height = 90*rad;
 	double angle = 10*rad;
-
-
-
-	double angle_p = 0*rad;
-
-
+	double bounce = 0*rad;
 
 	// initialize engine
 	if (sdl_initialize(&engine))
@@ -146,165 +160,81 @@ int main(int argc, char* argv[])
 		c_b = 0;
 		color_c = SDL_MapRGBA(format, c_r, c_g, c_b, c_a);
 
-		// defining cube vertices
-		cube_v[0] = (vec3f){0.5, 0.5, 4.0};
-		cube_v[1] = (vec3f){-0.5, 0.5, 4.0};
-		cube_v[2] = (vec3f){0.5, -0.5, 4.0};
-		cube_v[3] = (vec3f){-0.5, -0.5, 4.0};
-		cube_v[4] = (vec3f){0.5, 0.5, 5.0};
-		cube_v[5] = (vec3f){-0.5, 0.5, 5.0};
-		cube_v[6] = (vec3f){0.5, -0.5, 5.0};
-		cube_v[7] = (vec3f){-0.5, -0.5, 5.0};
-		
-		// projected cube
-		vec3f cube_v_rxz[8];
-		vec3f cube_v_p[8];
-		vec3f cube_v_s[8];
-		vec2d cube_v_pixel[8];
 
-
-		// project the points onto the screen
+		// rendering every point of v
 		for (int i=0; i<8; i++)
-		{	
-			cube_v_rxz[i] = rotate_xz(cube_v[i], angle);
-			
-			
-			if (cube_v_rxz[i].z <= NEAR_PLANE)
-				continue;
-			
-
-			cube_v_p[i] = project(cube_v_rxz[i]);
-			cube_v_s[i] = screen(cube_v_p[i]);
-			cube_v_pixel[i] = (vec2d){cube_v_s[i].x, cube_v_s[i].y};
-		}
-
-		// TESTING AND FINALISING THE ROTATION AND PROJECTION PIPELINE ON vec3f P1 AND P2
-		// ==============================================================================
-		//
-
-		vec3f P1 		= {0.5, 0.5, 4};
-		vec3f P2 		= {-0.5, 0.5, 5};
-		vec3f P_halo		= {0, 0.5, 4.5};
-		vec3f P_center 		= {0.0, 0.0, 4.5};
-		vec2d p1 		= {0, 0};
-		vec2d p2 		= {0, 0};
-		vec2d p_halo		= {0, 0};
-		
-
-		// right top point
-		//
-		// move the point to the origin
-		P1.x -= P_center.x;
-		P1.y -= P_center.y;
-		P1.z -= P_center.z;
-
-		// rotate the point
-		P1 = rotate_xz(P1, angle_p);
-
-		// move the point back
-		P1.x += P_center.x;
-		P1.y += P_center.y;
-		P1.z += P_center.z;
-
-		// check if near plane
-		if (P1.z > NEAR_PLANE)
 		{
-			P1 = project(P1);
-			P1 = screen(P1);
-			p1.x = P1.x;
-			p1.y = P1.y;
+			// move every point back into the origin
+			vT[i].x -= v[8].x;
+			vT[i].y -= v[8].y;
+			vT[i].z -= v[8].z;
 
-			draw_rect(pixels, p1, 5, green);
+			// rotate every point with angle "angle"
+			vT[i] = sib_RotateXZ(vT[i], angle);
+
+			// move every point back into their original place
+			vT[i].x += v[8].x;
+			vT[i].y += v[8].y;
+			vT[i].z += v[8].z;
+
+			// check if near plane
+			if (vT[i].z > NEAR_PLANE)
+			{
+				// project and scale every point
+				vT[i] = sib_Project(vT[i]);
+				vT[i] = sib_Screen(vT[i]);
+				vP[i].x = vT[i].x;
+				vP[i].y = vT[i].y;
+
+				//draw_rect(pixels, vP[i], 5, green);
+
+				
+			}
+
+			vT[i] = v[i];
+
+			// bounce the cube up and down
+			vT[i].y += 0.8*sin(bounce);
 		}
 
-
-		// left top point
-		//
-		// move the point to the origin
-		P2.x -= P_center.x;
-		P2.y -= P_center.y;
-		P2.z -= P_center.z;
-
-		// rotate the point
-		P2 = rotate_xz(P2, angle_p);
-
-		// move the point back
-		P2.x += P_center.x;
-		P2.y += P_center.y;
-		P2.z += P_center.z;
-
-		// check if near plane
-		if (P2.z > NEAR_PLANE)
-		{
-			P2 = project(P2);
-			P2 = screen(P2);
-			p2.x = P2.x;
-			p2.y = P2.y;
-		
-			draw_rect(pixels, p2, 5, green);
-		}
-
-
-		// center "halo" point, shouldn't move
-		//
-		// move the point to the origin
-		P_halo.x -= P_center.x;
-		P_halo.y -= P_center.y;
-		P_halo.z -= P_center.z;
-
-		// rotate the point
-		P_halo = rotate_xz(P_halo, angle_p);
-
-		// move the point back
-		P_halo.x += P_center.x;
-		P_halo.y += P_center.y;
-		P_halo.z += P_center.z;
-
-	
-		// check if near plane
-		if (P_halo.z > NEAR_PLANE)
-		{
-			P_halo = project(P_halo);
-			P_halo = screen(P_halo);
-			p_halo.x = P_halo.x;
-			p_halo.y = P_halo.y;
-
-			draw_rect(pixels, p_halo, 5, yellow);
-		}
-		// draw a projected, rotated pixel p1 and p2
-			
-		angle_p += 2*rad;
-
-		if (angle_p >= 2*3.141592)
-		{
-			angle_p -= 2*3.141592;
-		}
-
-
-		// ROTATION TESTING GROUND:OVER
-		// ===============================================================================
-		//
-	
-		angle += 0.5*rad;
+		angle += 2*rad;
+		bounce += 4*rad;
 
 		if (angle >= 2*3.141592)
 		{
 			angle -= 2*3.141592;
 		}
 
-		// draw a projected test triangle
-		draw_triangle(pixels, cube_v_pixel[1], cube_v_pixel[0], cube_v_pixel[3], blue);
-		draw_triangle(pixels, cube_v_pixel[3], cube_v_pixel[0], cube_v_pixel[2], green);	
-		draw_triangle(pixels, cube_v_pixel[2], cube_v_pixel[7], cube_v_pixel[3], red);
-		draw_triangle(pixels, cube_v_pixel[2], cube_v_pixel[6], cube_v_pixel[7], yellow);
-		
-
-		// draw a rectangle
-		for (int i=0; i<8; i++)
+		if (bounce >= 2*3.141592)
 		{
-			draw_rect(pixels, cube_v_pixel[i], 5, blue);
+			bounce -= 2*3.141592;
 		}
 
+		// draw rotated v cube triangles
+		//
+		// front face
+		draw_triangle(pixels, vP[1], vP[0], vP[3], blue);		// 1, 0, 3
+		draw_triangle(pixels, vP[0], vP[2], vP[3], green);
+
+		// right face
+		draw_triangle(pixels, vP[0], vP[4], vP[2], cyan);
+		draw_triangle(pixels, vP[2], vP[4], vP[6], magenta);
+		
+		// backface
+		draw_triangle(pixels, vP[6], vP[4], vP[5], blue);
+		draw_triangle(pixels, vP[5], vP[7], vP[6], green);
+	
+		// left face
+		draw_triangle(pixels, vP[7], vP[5], vP[1], cyan);		// 7, 5, 1
+		draw_triangle(pixels, vP[1], vP[3], vP[7], magenta);
+
+		// top face
+		draw_triangle(pixels, vP[5], vP[0], vP[1], red);
+		draw_triangle(pixels, vP[5], vP[4], vP[0], yellow);
+
+		// bottom face
+		draw_triangle(pixels, vP[3], vP[2], vP[7], red);
+		draw_triangle(pixels, vP[2], vP[6], vP[7], yellow);
 		
 		// render everything
 		SDL_UpdateTexture(engine.texture, NULL, pixels, SCREEN_WIDTH * sizeof(u32));
@@ -323,7 +253,7 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-vec3f screen(vec3f P)
+vec3f sib_Screen(vec3f P)
 {
 	P.x = (P.x + 1)/2*SCREEN_WIDTH;
 	P.y = (1 - (P.y + 1)/2)*SCREEN_HEIGHT;
@@ -331,7 +261,7 @@ vec3f screen(vec3f P)
 	return P;
 }
 
-vec3f project (vec3f P)
+vec3f sib_Project (vec3f P)
 {
 	P.x = P.x / P.z;
 	P.y = P.y / P.z;
@@ -339,7 +269,7 @@ vec3f project (vec3f P)
 	return P;
 }
 
-vec3f rotate_xz (vec3f P, double angle)
+vec3f sib_RotateXZ (vec3f P, double angle)
 {	
 	double c = cos(angle);
 	double s = sin(angle);
